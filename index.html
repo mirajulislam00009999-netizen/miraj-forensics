@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071525">
+<title>MIRAJ FORENSICS</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#071525;color:#fff}
+header{padding:24px 15px;text-align:center;background:#0d2238;border-bottom:1px solid #123e59}
+.logo{font-size:25px;font-weight:bold;color:#27d9ef;letter-spacing:2px}
+.subtitle{font-size:10px;color:#a8c5d8;margin-top:8px;letter-spacing:2px}
+main{padding:17px;max-width:700px;margin:auto}
+.welcome{margin:22px 0}
+.welcome h2{font-size:23px}
+.welcome p,.tool p{color:#a8c5d8;line-height:1.6}
+.tool{background:#102b43;border:1px solid #1b526b;border-radius:14px;padding:17px;margin:15px 0}
+.tool h3{color:#27d9ef;margin-top:0}
+.tool p{font-size:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:#102b43;border:1px solid #1b526b;border-radius:13px;padding:16px;min-height:125px;cursor:pointer}
+.tile:active{background:#17415e}
+.tile .symbol{font-size:25px;margin-bottom:12px}
+.tile strong{display:block;color:#27d9ef;font-size:15px}
+.tile small{display:block;color:#a8c5d8;line-height:1.5;margin-top:7px}
+.tag{display:inline-block;background:#624719;color:#ffd58b;padding:4px 8px;border-radius:20px;font-size:10px;margin-top:8px}
+button{width:100%;padding:13px;background:#087e9b;color:white;border:0;border-radius:9px;font-size:15px;font-weight:bold;margin-top:10px;cursor:pointer}
+.secondary{background:#24445d}
+button:disabled{opacity:.5}
+input[type=file]{width:100%;padding:12px;background:#071525;color:white;border:1px solid #286078;border-radius:8px;margin:10px 0}
+.status{padding:12px;background:#071d30;border-radius:8px;color:#b5d8e8;font-size:13px;line-height:1.5;margin-top:12px}
+.page{display:none}
+.page.active{display:block}
+.back{background:#24445d;margin-bottom:15px}
+.result{display:none;margin-top:18px}
+.report-item{background:#071d30;border:1px solid #19465e;padding:12px;border-radius:9px;margin:9px 0}
+.report-label{color:#8eb5ca;font-size:12px;margin-bottom:6px}
+.report-value{color:#fff;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.good{color:#62e6a2}
+.pending{color:#ffc66d}
+details{margin-top:14px;background:#071d30;padding:13px;border-radius:9px}
+summary{color:#27d9ef;cursor:pointer;font-weight:bold}
+.hash{font-size:12px;overflow-wrap:anywhere;color:#a8d9eb;line-height:1.7;margin-top:10px}
+.note{font-size:12px;color:#91aabd;line-height:1.6}
+footer{text-align:center;color:#7895a9;font-size:11px;padding:25px}
+@media(max-width:360px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="logo">MIRAJ FORENSICS</div>
+ <div class="subtitle">DIGITAL EVIDENCE & INTELLIGENCE</div>
+</header>
+
+<main>
+
+<!-- MAIN DASHBOARD -->
+<section id="dashboard" class="page active">
+ <div class="welcome">
+  <h2>Digital Forensics Dashboard</h2>
+  <p>Find the truth. Preserve the evidence.</p>
+  <p>Find files, examine digital evidence and explore recovery options.</p>
+ </div>
+
+ <div class="grid">
+<div class="tile" onclick="showPage('standard')">
+ <div class="symbol">🔎</div>
+ <strong>STANDARD FILE RECOVERY</strong>
+ <small>Automatically search supported locations for lost or deleted files. Normal existing files are excluded.</small>
+</div>
+
+<div class="tile" onclick="showPage('premium')">
+ <div class="symbol">👑</div>
+ <strong>PREMIUM DEEP RECOVERY</strong>
+ <small>Factory-reset recovery assessment. Potential recovery target: 10%–20% in technically recoverable cases.</small>
+ <span class="tag">PREMIUM</span>
+</div>
+
+<div class="tile" onclick="showPage('forensics')">
+ <div class="symbol">🛡️</div>
+ <strong>IMAGE & VIDEO FORENSICS</strong>
+ <small>One upload for automatic image or video examination, metadata and available forensic checks.</small>
+</div>
+</div>
+</section>
+
+<!-- STANDARD RECOVERY -->
+<section id="standard" class="page">
+ <button class="back" onclick="showPage('dashboard')">← Back to Dashboard</button>
+ <div class="tool">
+  <h3>Standard Deleted File Recovery</h3>
+  <p>Search for eligible deleted or lost files only. Normal files currently stored on your device will not be displayed as recovery results.</p>
+
+  <div class="report-item">
+   <div class="report-label">RECOVERY MODE</div>
+   <div class="report-value">Deleted and lost files only</div>
+  </div>
+
+  <div class="report-item">
+   <div class="report-label">EXISTING NORMAL FILES</div>
+   <div class="report-value good">Excluded from recovery results</div>
+  </div>
+
+  <div class="status" id="recoveryStatus">
+   Standard Recovery engine is under development. No device scan has started.
+  </div>
+
+  <button id="recoveryScanButton" disabled>
+   Recovery Engine Not Connected
+  </button>
+
+  <div id="recoveryResults"></div>
+
+  <p class="note">
+   This browser version cannot scan Android internal storage for permanently deleted files.
+   The native Android recovery engine must be connected before a real scan can run.
+   Files in a device trash folder may sometimes be restorable, but they will only be shown
+   after the engine verifies that they are deleted or trashed.
+  </p>
+ </div>
+</section>
+
+<!-- PREMIUM DEEP RECOVERY -->
+<section id="premium" class="page">
+ <button class="back" onclick="showPage('dashboard')">← Back to Dashboard</button>
+ <div class="tool">
+  <h3>Premium Deep Recovery</h3>
+  <span class="tag">PREMIUM FEATURE</span>
+  <p>Designed exclusively for advanced recovery assessment of files lost after a factory reset.</p>
+  <div class="report-item">
+   <div class="report-label">FACTORY RESET RECOVERY</div>
+   <div class="report-value pending">Feasibility assessment required</div>
+  </div>
+  <div class="report-item">
+   <div class="report-label">INITIAL RECOVERY TARGET</div>
+   <div class="report-value">10%–20% potential recovery target in technically recoverable cases — not guaranteed.</div>
+  </div>
+  <div class="report-item">
+   <div class="report-label">PLANNED CAPABILITIES</div>
+   <div class="report-value">Device assessment, supported storage examination, recoverable file identification and recovery report.</div>
+  </div>
+  <div class="status">Deep Recovery engine is not connected yet. No device scan or recovery is being performed by this screen.</div>
+  <p class="note">Factory resets on modern encrypted Android devices can make previous data permanently inaccessible. Recovery depends on device model, encryption, storage type and subsequent use. Never promise a fixed recovery percentage before testing.</p>
+ </div>
+</section>
+
+<!-- IMAGE AND VIDEO FORENSICS -->
+<section id="forensics" class="page">
+ <button class="back" onclick="showPage('dashboard')">← Back to Dashboard</button>
+ <div class="tool">
+  <h3>Image & Video Examination</h3>
+  <p>Select an image or video file for preliminary forensic analysis.</p>
+  <input type="file" id="mediaFile" accept="image/*,video/*">
+  <p class="note">Analysis starts automatically when you select an image or video.</p>
+  <div class="status" id="status">Waiting for file selection...</div>
+ </div>
+
+ <section class="tool result" id="report">
+  <h3>Forensic Analysis Report</h3>
+  <div class="report-item"><div class="report-label">FILE NAME</div><div class="report-value" id="fileName">-</div></div>
+  <div class="report-item"><div class="report-label">FILE TYPE</div><div class="report-value" id="fileType">-</div></div>
+  <div class="report-item"><div class="report-label">FILE SIZE</div><div class="report-value" id="fileSize">-</div></div>
+  <div class="report-item"><div class="report-label">MEDIA INFORMATION</div><div class="report-value" id="mediaInfo">-</div></div>
+  <div class="report-item"><div class="report-label">JPEG EXIF METADATA</div><div class="report-value" id="forensicExif">Not examined</div></div>
+  <div class="report-item"><div class="report-label">EXIF DATA VALIDATION</div><div class="report-value" id="exifIssuesResult">Not examined.</div></div>
+  <div class="report-item"><div class="report-label">FILE MODIFIED DATE</div><div class="report-value" id="modifiedDate">-</div></div>
+  <div class="report-item"><div class="report-label">FILE INTEGRITY</div><div class="report-value good" id="integrity">SHA-256 pending</div></div>
+  <div class="report-item"><div class="report-label">AI AUTHENTICITY ANALYSIS</div><div class="report-value pending">Not analyzed — AI engine not connected.</div></div>
+  <div class="report-item"><div class="report-label">SIMILARITY / COPY DETECTION</div><div class="report-value pending">Not checked — reference database not connected.</div></div>
+  <div class="report-item"><div class="report-label">JPEG STRUCTURE EXAMINATION</div><div class="report-value" id="jpegStructureResult">Not examined.</div></div>
+  <div class="report-item"><div class="report-label">PNG STRUCTURE EXAMINATION</div><div class="report-value" id="pngStructureResult">Not examined.</div></div>
+  <div class="report-item"><div class="report-label">PNG METADATA EXTRACTION</div><div class="report-value" id="pngMetadataResult">Not examined.</div></div>
+  <div class="report-item"><div class="report-label">PNG METADATA VALIDATION</div><div class="report-value" id="pngMetadataValidationResult">Not examined.</div></div>
+  <div class="report-item"><div class="report-label">MODIFICATION ANALYSIS</div><div class="report-value pending" id="modificationResult">Waiting for examination.</div></div>
+  <div class="report-item"><div class="report-label">PRELIMINARY ASSESSMENT</div><div class="report-value" id="assessment">Further analysis required.</div></div>
+  <details>
+   <summary>Advanced Details — SHA-256 Fingerprint</summary>
+   <div class="hash" id="hashResult">SHA-256 will appear here.</div>
+   <button class="secondary" onclick="copyHash()">Copy SHA-256</button>
+  </details>
+  <p class="note">SHA-256 identifies exact file content, not creator identity or originality. File modified dates are not proof of capture dates.</p>
+  <button onclick="downloadReport()">Download Analysis Report</button>
+  <button class="secondary" onclick="resetAnalysis()">Choose Another File</button>
+ </section>
+</section>
+
+<!-- METADATA -->
+<section id="metadata" class="page">
+ <button class="back" onclick="showPage('dashboard')">← Back to Dashboard</button>
+ <div class="tool">
+  <h3>Metadata Analysis</h3>
+  <p>Extract available EXIF information from JPEG image files directly in your browser.</p>
+
+  <input type="file" id="metadataFile" accept="image/jpeg,.jpg,.jpeg">
+  <button onclick="analyzeMetadata()">Analyze Image Metadata</button>
+
+  <div class="status" id="metadataStatus">Waiting for JPEG image selection...</div>
+
+  <div id="metadataResults" style="display:none;">
+   <h4>File Information</h4>
+   <div class="status" id="metadataFileInfo"></div>
+
+   <h4>EXIF Information</h4>
+   <div class="status" id="metadataDetails"></div>
+
+   <p class="note">Only information actually found in the JPEG EXIF data is displayed. Missing information is marked Not Found. GPS coordinates may reveal a private location.</p>
+
+   <button onclick="downloadMetadataReport()">Download Metadata Report</button>
+  </div>
+ </div>
+</section>
+
+<!-- HISTORY -->
+<section id="history" class="page">
+ <button class="back" onclick="showPage('dashboard')">← Back to Dashboard</button>
+ <div class="tool">
+  <h3>Recovery & Examination History</h3>
+  <div id="historyList" class="status">No activity recorded in this session.</div>
+  <p class="note">Session history is temporary and will be cleared when the page is reloaded. Account-based history storage is not connected yet.</p>
+ </div>
+</section>
+
+<!-- COMING SOON -->
+<section id="coming" class="page">
+ <button class="back" onclick="showPage('dashboard')">← Back to Dashboard</button>
+ <div class="tool">
+  <h3>Feature Under Development</h3>
+  <div class="status">This analysis engine is planned but not connected yet.</div>
+ </div>
+</section>
+
+</main>
+
+<footer>MIRAJ FORENSICS · DEVELOPMENT BUILD</footer>
+
+<script>
+let currentHash = "";
+let currentReport = "";
+let historyItems = [];
+
+function showPage(pageId) {
+ document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+ document.getElementById(pageId).classList.add("active");
+ window.scrollTo(0,0);
+}
+
+function addHistory(message) {
+ historyItems.unshift(new Date().toLocaleString() + " — " + message);
+ document.getElementById("historyList").textContent = historyItems.join("\n");
+ document.getElementById("historyList").style.whiteSpace = "pre-line";
+}
+
+function formatSize(bytes) {
+ if (bytes < 1024) return bytes + " Bytes";
+ if (bytes < 1048576) return (bytes/1024).toFixed(2) + " KB";
+ if (bytes < 1073741824) return (bytes/1048576).toFixed(2) + " MB";
+ return (bytes/1073741824).toFixed(2) + " GB";
+}
+
+async function getMediaInfo(file) {
+ if (file.type.startsWith("image/")) {
+  return new Promise(resolve => {
+   const url = URL.createObjectURL(file);
+   const img = new Image();
+   img.onload = () => {
+    resolve("Image dimensions: " + img.naturalWidth + " × " + img.naturalHeight + " pixels");
+    URL.revokeObjectURL(url);
+   };
+   img.onerror = () => {
+    resolve("Image dimensions could not be read.");
+    URL.revokeObjectURL(url);
+   };
+   img.src = url;
+  });
+ }
+
+ if (file.type.startsWith("video/")) {
+  return new Promise(resolve => {
+   const url = URL.createObjectURL(file);
+   const video = document.createElement("video");
+   video.preload = "metadata";
+   video.onloadedmetadata = () => {
+    resolve("Video dimensions: " + video.videoWidth + " × " + video.videoHeight +
+     " pixels | Duration: " + video.duration.toFixed(2) + " seconds");
+    URL.revokeObjectURL(url);
+   };
+   video.onerror = () => {
+    resolve("Video metadata could not be read.");
+    URL.revokeObjectURL(url);
+   };
+   video.src = url;
+  });
+ }
+ return "Media dimensions not available.";
+}
+
+function examineJPEGStructure(buffer) {
+ const bytes = new Uint8Array(buffer);
+ const length = bytes.length;
+ const issues = [];
+ const segments = [];
+ let scanCount = 0;
+ let pos = 2;
+ let foundEOI = false;
+ let foundSOS = false;
+ let inScan = false;
+ let additionalSOI = 0;
+ let valid = true;
+
+ if (length < 4 || bytes[0] !== 0xFF || bytes[1] !== 0xD8) {
+  return {
+   status: "INVALID JPEG",
+   summary: "JPEG Start Of Image marker is missing or invalid.",
+   segments: 0,
+   scans: 0,
+   trailingBytes: 0,
+   additionalSOI: 0,
+   issues: ["Invalid SOI marker"]
+  };
+ }
+
+ const standalone = marker => marker === 0x01 ||
+  (marker >= 0xD0 && marker <= 0xD7);
+
+ while (pos < length && !foundEOI) {
+
+  if (inScan) {
+   let foundNextMarker = false;
+
+   while (pos < length) {
+    if (bytes[pos] !== 0xFF) {
+     pos++;
+     continue;
+    }
+
+    const markerStart = pos;
+    pos++;
+
+    if (pos >= length) {
+     issues.push("Incomplete marker at the end of scan data.");
+     valid = false;
+     break;
+    }
+
+    if (bytes[pos] === 0x00) {
+     pos++;
+     continue;
+    }
+
+    if (bytes[pos] >= 0xD0 && bytes[pos] <= 0xD7) {
+     pos++;
+     continue;
+    }
+
+    while (pos < length && bytes[pos] === 0xFF) pos++;
+
+    if (pos >= length) {
+     issues.push("Incomplete marker after scan data.");
+     valid = false;
+     break;
+    }
+
+    if (bytes[pos] === 0x00) {
+     issues.push("Invalid marker fill sequence in scan data.");
+     valid = false;
+     pos++;
+     continue;
+    }
+
+    pos = markerStart;
+    inScan = false;
+    foundNextMarker = true;
+    break;
+   }
+
+   if (!foundNextMarker) {
+    if (valid) {
+     issues.push("Scan data ended without a following JPEG marker.");
+     valid = false;
+    }
+    break;
+   }
+
+   continue;
+  }
+
+  if (bytes[pos] !== 0xFF) {
+   issues.push("Unexpected data or missing marker at byte " + pos);
+   valid = false;
+   break;
+  }
+
+  while (pos < length && bytes[pos] === 0xFF) pos++;
+
+  if (pos >= length) {
+   issues.push("Incomplete JPEG marker.");
+   valid = false;
+   break;
+  }
+
+  const marker = bytes[pos++];
+
+  if (marker === 0x00) {
+   issues.push("Unexpected stuffed byte outside scan data.");
+   valid = false;
+   break;
+  }
+
+  if (marker === 0xD9) {
+   foundEOI = true;
+   break;
+  }
+
+  if (marker === 0xD8) {
+   additionalSOI++;
+   issues.push("Unexpected additional SOI marker at byte " + (pos - 2));
+   valid = false;
+   continue;
+  }
+
+  if (marker >= 0xD0 && marker <= 0xD7) {
+   issues.push("Restart marker found outside scan data.");
+   valid = false;
+   continue;
+  }
+
+  if (standalone(marker)) continue;
+
+  if (pos + 2 > length) {
+   issues.push("Incomplete segment length.");
+   valid = false;
+   break;
+  }
+
+  const segmentLength = (bytes[pos] << 8) | bytes[pos + 1];
+
+  if (segmentLength < 2 || pos + segmentLength > length) {
+   issues.push("Invalid or truncated segment at byte " + (pos - 2));
+   valid = false;
+   break;
+  }
+
+  if (marker === 0xDA && segmentLength < 6) {
+   issues.push("SOS segment length is too short.");
+   valid = false;
+   break;
+  }
+
+  segments.push({
+   marker: marker.toString(16).toUpperCase().padStart(2, "0"),
+   length: segmentLength
+  });
+
+  if (marker === 0xDA) {
+   foundSOS = true;
+   scanCount++;
+   inScan = true;
+  }
+
+  pos += segmentLength;
+ }
+
+ if (!foundSOS) {
+  issues.push("Start Of Scan marker not found.");
+  valid = false;
+ }
+
+ if (!foundEOI) {
+  issues.push("End Of Image marker not found.");
+  valid = false;
+ }
+
+ let trailingBytes = 0;
+
+ if (foundEOI && pos < length) {
+  trailingBytes = length - pos;
+  issues.push(trailingBytes + " trailing byte(s) found after EOI marker.");
+ }
+
+ let status = "STRUCTURE CHECK PASSED";
+
+ if (!valid) {
+  status = "STRUCTURE ANOMALY FOUND";
+ } else if (trailingBytes > 0) {
+  status = "REVIEW RECOMMENDED";
+ }
+
+ return {
+  status,
+  summary: valid
+   ? "JPEG marker, segment boundaries and scan transitions checked. Structural validity does not establish image authenticity or absence of editing."
+   : "One or more JPEG structural checks failed. The file may be incomplete, corrupted, or use an unsupported structure.",
+  segments: segments.length,
+  scans: scanCount,
+  trailingBytes,
+  additionalSOI,
+  issues
+ };
+}
+
+
+async function examinePNGStructure(buffer) {
+ const bytes = new Uint8Array(buffer);
+ const length = bytes.length;
+ const issues = [];
+ const chunks = [];
+ const metadata = [];
+ const metadataIssues = [];
+ const MAX_PNG_METADATA_BYTES = 1024 * 1024;
+ const signature = [137,80,78,71,13,10,26,10];
+
+ if (length < 8 || !signature.every((v,i) => bytes[i] === v)) {
+  return {
+   status: "INVALID PNG",
+   summary: "PNG signature is missing or invalid.",
+   width: 0, height: 0, chunks: 0,
+   idat: false, iend: false,
+   issues: ["Invalid PNG signature"]
+  };
+ }
+
+ const readU32 = pos =>
+  ((bytes[pos] * 0x1000000) +
+   (bytes[pos+1] << 16) +
+   (bytes[pos+2] << 8) +
+   bytes[pos+3]) >>> 0;
+
+ const isValidPNGKeyword = (start, end) => {
+  const length = end - start;
+  if (length < 1 || length > 79) return false;
+  if (bytes[start] === 32 || bytes[end - 1] === 32) return false;
+
+  for (let i = start; i < end; i++) {
+   if (bytes[i] < 32 || bytes[i] > 126) return false;
+   if (bytes[i] === 32 && i > start && bytes[i - 1] === 32) {
+    return false;
+   }
+  }
+  return true;
+ };
+
+ const decodePNGText = (start, end) => {
+  try {
+   return new TextDecoder("utf-8", {fatal: false})
+    .decode(bytes.subarray(start, end));
+  } catch (error) {
+   return "";
+  }
+ };
+
+ const decodePNGLatin1 = (start, end) => {
+  let result = "";
+  for (let i = start; i < end; i++) {
+   result += String.fromCharCode(bytes[i]);
+  }
+  return result;
+ };
+
+ const decompressPNGData = async compressedData => {
+  let reader = null;
+
+  try {
+   if (typeof DecompressionStream !== "function") {
+    return {ok: false, error: "Decompression API unavailable."};
+   }
+
+   const stream = new Blob([compressedData])
+    .stream()
+    .pipeThrough(new DecompressionStream("deflate"));
+
+   reader = stream.getReader();
+
+   const parts = [];
+   let total = 0;
+
+   while (true) {
+    const result = await reader.read();
+
+    if (result.done) break;
+
+    total += result.value.length;
+
+    if (total > MAX_PNG_METADATA_BYTES) {
+     await reader.cancel();
+     return {ok: false, error: "Decompressed metadata exceeds 1 MiB limit."};
+    }
+
+    parts.push(result.value);
+   }
+
+   const output = new Uint8Array(total);
+   let offset = 0;
+
+   for (const part of parts) {
+    output.set(part, offset);
+    offset += part.length;
+   }
+
+   return {ok: true, data: output};
+
+  } catch (error) {
+   if (reader) {
+    try { await reader.cancel(); } catch (ignored) {}
+   }
+
+   return {ok: false, error: "PNG metadata decompression failed."};
+  }
+ };
+
+ const crc32 = (start, end) => {
+  let crc = 0xFFFFFFFF;
+  for (let i = start; i < end; i++) {
+   crc ^= bytes[i];
+   for (let j = 0; j < 8; j++) {
+    crc = (crc >>> 1) ^ ((crc & 1) ? 0xEDB88320 : 0);
+   }
+  }
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+ };
+
+ let pos = 8;
+ let width = 0;
+ let height = 0;
+ let bitDepth = null;
+ let colorType = null;
+ let hasIHDR = false;
+ let hasPLTE = false;
+ let hasIDAT = false;
+ let hasIEND = false;
+ let idatEnded = false;
+ let valid = true;
+
+ while (pos < length && !hasIEND) {
+  if (length - pos < 12) {
+   issues.push("Incomplete PNG chunk header or CRC.");
+   valid = false;
+   break;
+  }
+
+  const chunkLength = readU32(pos);
+  const typeStart = pos + 4;
+  const dataStart = pos + 8;
+  const dataEnd = dataStart + chunkLength;
+  const crcEnd = dataEnd + 4;
+
+  if (dataEnd < dataStart || crcEnd > length) {
+   issues.push("PNG chunk exceeds file boundary.");
+   valid = false;
+   break;
+  }
+
+  let chunkType = "";
+  for (let i = typeStart; i < typeStart + 4; i++) {
+   chunkType += String.fromCharCode(bytes[i]);
+  }
+
+  if (!/^[A-Za-z]{4}$/.test(chunkType)) {
+   issues.push("Invalid PNG chunk type: " + chunkType);
+   valid = false;
+   break;
+  }
+
+  const knownCriticalChunks = ["IHDR", "PLTE", "IDAT", "IEND"];
+
+  if (/^[A-Z]/.test(chunkType) &&
+      !knownCriticalChunks.includes(chunkType)) {
+   issues.push("Unknown critical PNG chunk detected: " + chunkType);
+   valid = false;
+  }
+
+  if (chunks.length === 0 && chunkType !== "IHDR") {
+   issues.push("IHDR is not the first PNG chunk.");
+   valid = false;
+  }
+
+  if (chunkType === "IHDR") {
+   if (hasIHDR || chunks.length !== 0 || chunkLength !== 13) {
+    issues.push("Invalid, duplicate, or misplaced IHDR chunk.");
+    valid = false;
+   } else {
+    hasIHDR = true;
+    width = readU32(dataStart);
+    height = readU32(dataStart + 4);
+    bitDepth = bytes[dataStart + 8];
+    colorType = bytes[dataStart + 9];
+
+    const validDepths = {
+     0: [1,2,4,8,16],
+     2: [8,16],
+     3: [1,2,4,8],
+     4: [8,16],
+     6: [8,16]
+    };
+
+    if (
+     width === 0 || height === 0 ||
+     !validDepths[colorType] ||
+     !validDepths[colorType].includes(bitDepth)
+    ) {
+     issues.push("Invalid PNG dimensions, color type, or bit depth.");
+     valid = false;
+    }
+
+    if (bytes[dataStart + 10] !== 0 ||
+        bytes[dataStart + 11] !== 0 ||
+        bytes[dataStart + 12] > 1) {
+     issues.push("Unsupported or invalid PNG compression, filter, or interlace method.");
+     valid = false;
+    }
+   }
+  } else if (!hasIHDR) {
+   issues.push("PNG chunk found before IHDR.");
+   valid = false;
+  }
+
+  if (chunkType === "PLTE") {
+   if (hasPLTE) {
+    issues.push("Duplicate PLTE chunk found.");
+    valid = false;
+   }
+   if (hasIDAT) {
+    issues.push("PLTE chunk must appear before IDAT.");
+    valid = false;
+   }
+   if (chunkLength === 0 || chunkLength % 3 !== 0 || chunkLength > 768) {
+    issues.push("Invalid PLTE chunk length.");
+    valid = false;
+   }
+   if (colorType === 0 || colorType === 4) {
+    issues.push("PLTE is not permitted for grayscale PNG color types.");
+    valid = false;
+   }
+   if (colorType === 3 && bitDepth !== null &&
+       chunkLength > 3 * (2 ** bitDepth)) {
+    issues.push("PLTE contains more entries than the indexed bit depth permits.");
+    valid = false;
+   }
+   hasPLTE = true;
+  }
+
+  if (chunkType === "IDAT") {
+   if (idatEnded) {
+    issues.push("PNG IDAT chunks are not consecutive.");
+    valid = false;
+   }
+   hasIDAT = true;
+  } else if (hasIDAT && chunkType !== "IEND") {
+   idatEnded = true;
+  }
+
+  if (chunkType === "IEND") {
+   if (chunkLength !== 0) {
+    issues.push("IEND chunk must have zero data length.");
+    valid = false;
+   }
+   if (!hasIDAT) {
+    issues.push("PNG IDAT image data not found.");
+    valid = false;
+   }
+   hasIEND = true;
+  }
+
+  const storedCRC = readU32(dataEnd);
+  const calculatedCRC = crc32(typeStart, dataEnd);
+
+  if (storedCRC !== calculatedCRC) {
+   issues.push("CRC-32 mismatch in " + chunkType + " chunk.");
+   valid = false;
+  }
+
+  if (storedCRC === calculatedCRC && chunkType === "zTXt") {
+   let separator = -1;
+
+   for (let i = dataStart; i < dataEnd; i++) {
+    if (bytes[i] === 0) {
+     separator = i;
+     break;
+    }
+   }
+
+   if (separator <= dataStart || separator + 2 > dataEnd) {
+    metadataIssues.push("Invalid PNG zTXt metadata chunk.");
+   } else if (!isValidPNGKeyword(dataStart, separator)) {
+    metadataIssues.push("Invalid PNG zTXt keyword.");
+   } else {
+    const compressionMethod = bytes[separator + 1];
+
+    if (compressionMethod !== 0) {
+     metadataIssues.push("Unsupported PNG zTXt compression method.");
+    } else {
+     const compressedData = bytes.slice(separator + 2, dataEnd);
+     const result = await decompressPNGData(compressedData);
+
+     if (result.ok) {
+      metadata.push({
+       type: "zTXt",
+       keyword: decodePNGLatin1(dataStart, separator),
+       text: decodePNGLatin1(0, 0) + Array.from(result.data, byte => String.fromCharCode(byte)).join("")
+      });
+     } else {
+      metadataIssues.push("zTXt extraction failed: " + result.error);
+     }
+    }
+   }
+  }
+
+  if (storedCRC === calculatedCRC && chunkType === "iTXt") {
+   let pos = dataStart;
+
+   const findNull = start => {
+    for (let i = start; i < dataEnd; i++) {
+     if (bytes[i] === 0) return i;
+    }
+    return -1;
+   };
+
+   const keywordEnd = findNull(pos);
+
+   if (keywordEnd <= pos || keywordEnd + 3 > dataEnd) {
+    metadataIssues.push("Invalid PNG iTXt metadata chunk.");
+   } else if (!isValidPNGKeyword(pos, keywordEnd)) {
+    metadataIssues.push("Invalid PNG iTXt keyword.");
+   } else {
+    const keyword = decodePNGLatin1(pos, keywordEnd);
+    pos = keywordEnd + 1;
+
+    const compressionFlag = bytes[pos++];
+    const compressionMethod = bytes[pos++];
+
+    const languageEnd = findNull(pos);
+
+    if (languageEnd < 0 || compressionFlag > 1 || compressionMethod !== 0) {
+     metadataIssues.push("Invalid PNG iTXt compression or language fields.");
+    } else {
+     const language = decodePNGText(pos, languageEnd);
+     pos = languageEnd + 1;
+
+     const translatedEnd = findNull(pos);
+
+     if (translatedEnd < 0) {
+      metadataIssues.push("Invalid PNG iTXt translated keyword.");
+     } else {
+      const translatedKeyword = decodePNGText(pos, translatedEnd);
+      pos = translatedEnd + 1;
+
+      let textData = bytes.slice(pos, dataEnd);
+
+      if (compressionFlag === 1) {
+       const result = await decompressPNGData(textData);
+
+       if (!result.ok) {
+        metadataIssues.push("iTXt extraction failed: " + result.error);
+        textData = null;
+       } else {
+        textData = result.data;
+       }
+      } else if (textData.length > MAX_PNG_METADATA_BYTES) {
+       metadataIssues.push("iTXt metadata exceeds 1 MiB limit.");
+       textData = null;
+      }
+
+      if (textData !== null) {
+       metadata.push({
+        type: "iTXt",
+        keyword,
+        language,
+        translatedKeyword,
+        text: decodePNGText(0, 0) + new TextDecoder("utf-8", {fatal: false}).decode(textData)
+       });
+      }
+     }
+    }
+   }
+  }
+
+  if (storedCRC === calculatedCRC && chunkType === "tEXt") {
+   let separator = -1;
+   for (let i = dataStart; i < dataEnd; i++) {
+    if (bytes[i] === 0) {
+     separator = i;
+     break;
+    }
+   }
+
+   if (separator > dataStart &&
+       isValidPNGKeyword(dataStart, separator)) {
+    metadata.push({
+     type: "tEXt",
+     keyword: decodePNGLatin1(dataStart, separator),
+     text: decodePNGLatin1(separator + 1, dataEnd)
+    });
+   } else {
+    metadataIssues.push("Invalid PNG tEXt metadata chunk or keyword.");
+   }
+  }
+
+  chunks.push(chunkType);
+  pos = crcEnd;
+ }
+
+ if (!hasIHDR) {
+  issues.push("PNG IHDR chunk not found.");
+  valid = false;
+ }
+ if (colorType === 3 && !hasPLTE) {
+  issues.push("Indexed PNG requires a PLTE palette chunk.");
+  valid = false;
+ }
+ if (!hasIDAT) {
+  issues.push("PNG IDAT chunk not found.");
+  valid = false;
+ }
+ if (!hasIEND) {
+  issues.push("PNG IEND chunk not found.");
+  valid = false;
+ }
+
+ const trailingBytes = hasIEND ? length - pos : 0;
+
+ if (trailingBytes > 0) {
+  issues.push(trailingBytes + " trailing byte(s) found after IEND.");
+ }
+
+ const status = !valid
+  ? "STRUCTURE ANOMALY FOUND"
+  : trailingBytes > 0
+   ? "REVIEW RECOMMENDED"
+   : "STRUCTURE CHECK PASSED";
+
+ return {
+  status,
+  summary: valid
+   ? "PNG signature, chunk boundaries, IHDR, IDAT, IEND and CRC-32 checks completed. Structural validity does not establish image authenticity."
+   : "One or more PNG structural checks failed.",
+  width,
+  height,
+  bitDepth,
+  colorType,
+  chunks: chunks.length,
+  metadata,
+  metadataIssues,
+  idat: hasIDAT,
+  iend: hasIEND,
+  trailingBytes,
+  issues
+ };
+}
+
+function analyzeModification(file, exifData) {
+ if (!file.type.includes("image") && !/\.(jpe?g|png|webp)$/i.test(file.name)) {
+  return {
+   status: "INCONCLUSIVE",
+   summary: "Video or unsupported format: deep modification analysis is not available."
+  };
+ }
+
+ if (!/\.jpe?g$/i.test(file.name) && file.type !== "image/jpeg") {
+  return {
+   status: "INCONCLUSIVE",
+   summary: "This version checks JPEG EXIF metadata only."
+  };
+ }
+
+ if (!exifData || !exifData.found) {
+  return {
+   status: "INCONCLUSIVE",
+   summary: "JPEG EXIF metadata not found. Editing cannot be confirmed or ruled out."
+  };
+ }
+
+ const software = String(exifData.software || "").trim();
+ const cameraSoftwarePattern = /\b(camera|mediatek|qualcomm|samsung camera|pixel camera|google camera|huawei camera|xiaomi camera|oppo camera|vivo camera|oneplus camera)\b/i;
+ const editingSoftwarePattern = /\b(photoshop|lightroom|snapseed|picsart|gimp|affinity photo|paint\.net|canva|pixlr|photopea)\b/i;
+
+ if (software && editingSoftwarePattern.test(software)) {
+  return {
+   status: "POTENTIAL EDITING SOFTWARE FOUND",
+   summary: "Editing-related software metadata found: " + software + ". This is a potential indicator only, not proof of image editing."
+  };
+ }
+
+ if (software && cameraSoftwarePattern.test(software)) {
+  return {
+   status: "CAMERA SOFTWARE IDENTIFIED",
+   summary: "Camera-related software metadata found: " + software + ". This may be the phone's camera processing software and is not classified as editing evidence."
+  };
+ }
+
+ if (software) {
+  return {
+   status: "UNCLASSIFIED SOFTWARE METADATA",
+   summary: "Software metadata found: " + software + ". Its purpose is not recognized, so no editing conclusion is made."
+  };
+ }
+
+ if (exifData.date || exifData.make || exifData.model) {
+  return {
+   status: "NO EDITING SOFTWARE TAG FOUND",
+   summary: "No recognized editing software tag found in available EXIF data. This does not prove the image is unedited."
+  };
+ }
+
+ return {
+  status: "INCONCLUSIVE",
+  summary: "Available EXIF information is insufficient to assess modification."
+ };
+}
+
+async function analyzeFile() {
+ const file = document.getElementById("mediaFile").files[0];
+ const status = document.getElementById("status");
+ const report = document.getElementById("report");
+
+ if (!file) {
+  status.textContent = "Please select a file first.";
+  return;
+ }
+
+ status.textContent = "Analyzing file. Please wait...";
+ report.style.display = "none";
+ currentHash = "";
+
+ try {
+  const mediaInfo = await getMediaInfo(file);
+
+  let exifSummary = "Not extracted: JPEG EXIF reader supports JPEG images only.";
+  let exifData = null;
+  let modificationResult = {status: "INCONCLUSIVE", summary: "Modification indicators could not be examined."};
+
+  if (file.type === "image/jpeg" || /\.jpe?g$/i.test(file.name)) {
+   exifData = readExifJPEG(await file.arrayBuffer());
+
+   if (!exifData.found) {
+    exifSummary = "EXIF information: Not Found in this JPEG.";
+   } else {
+    const exifRows = [
+     ["Camera Make", exifData.make],
+     ["Camera Model", exifData.model],
+     ["Original Capture Date", exifData.date],
+     ["Editing Software", exifData.software],
+     ["EXIF Image Width", exifData.width],
+     ["EXIF Image Height", exifData.height],
+     ["GPS Coordinates", exifData.gps]
+    ];
+
+    exifSummary = exifRows.map(row =>
+     row[0] + ": " + (row[1] === null ? "Not Found" : row[1])
+    ).join("\n");
+   }
+  }
+
+  let pngStructure = null;
+  if (file.type === "image/png" || /\.png$/i.test(file.name)) {
+   pngStructure = await examinePNGStructure(await file.arrayBuffer());
+   document.getElementById("pngStructureResult").textContent =
+    pngStructure.status + " — " + pngStructure.summary +
+    " Dimensions: " + pngStructure.width + " × " + pngStructure.height +
+    ", Bit Depth: " + pngStructure.bitDepth +
+    ", Color Type: " + pngStructure.colorType +
+    ", Chunks: " + pngStructure.chunks +
+    ", Trailing bytes: " + pngStructure.trailingBytes +
+    (pngStructure.issues.length ? " Issues: " + pngStructure.issues.join(" | ") : "");
+  } else {
+   document.getElementById("pngStructureResult").textContent =
+    "Not applicable: PNG structure examination supports PNG files only.";
+  }
+
+  if (pngStructure) {
+   const pngMetadata = pngStructure.metadata || [];
+   document.getElementById("pngMetadataResult").textContent =
+    pngMetadata.length
+     ? pngMetadata.map(item =>
+        item.keyword + ": " + item.text
+       ).join(" | ") +
+       " — Metadata presence does not prove image authenticity."
+     : "No supported PNG text metadata found. This does not prove authenticity.";
+  } else {
+   document.getElementById("pngMetadataResult").textContent =
+    "Not applicable: PNG metadata extraction supports PNG files only.";
+  }
+
+  document.getElementById("pngMetadataValidationResult").textContent =
+   pngStructure
+    ? ((pngStructure.metadataIssues || []).length
+       ? "METADATA WARNINGS: " + pngStructure.metadataIssues.join(" | ")
+       : "No supported PNG metadata validation warnings detected.")
+    : "Not applicable: PNG metadata validation supports PNG files only.";
+
+  let jpegStructure = null;
+  if (file.type === "image/jpeg" || /\.jpe?g$/i.test(file.name)) {
+   jpegStructure = examineJPEGStructure(await file.arrayBuffer());
+   document.getElementById("jpegStructureResult").textContent =
+    jpegStructure.status + " — " + jpegStructure.summary +
+    " Segments: " + jpegStructure.segments +
+    ", Scans: " + jpegStructure.scans +
+    ", Trailing bytes: " + jpegStructure.trailingBytes +
+    ", Additional SOI markers: " + jpegStructure.additionalSOI +
+    (jpegStructure.issues.length ? " Issues: " + jpegStructure.issues.join(" | ") : "");
+  } else {
+   document.getElementById("jpegStructureResult").textContent =
+    "Not applicable: JPEG structure examination supports JPEG files only.";
+  }
+
+  modificationResult = analyzeModification(file, exifData);
+  document.getElementById("modificationResult").textContent = modificationResult.status + " — " + modificationResult.summary;
+
+  document.getElementById("fileName").textContent = file.name;
+  document.getElementById("fileType").textContent = file.type || "Unknown";
+  document.getElementById("fileSize").textContent = formatSize(file.size);
+  document.getElementById("mediaInfo").textContent = mediaInfo;
+  document.getElementById("forensicExif").textContent = exifSummary;
+  document.getElementById("exifIssuesResult").textContent =
+   exifData && exifData.found
+    ? (exifData.issues.length
+       ? "VALIDATION WARNINGS: " + exifData.issues.join(" | ")
+       : "No EXIF boundary or format warnings detected. This is not proof of authenticity.")
+    : "Not applicable: EXIF data not found or not supported.";
+  document.getElementById("modifiedDate").textContent =
+   file.lastModified ? new Date(file.lastModified).toLocaleString() : "Not available";
+
+  status.textContent = "Calculating SHA-256 fingerprint...";
+
+  if (!crypto.subtle) throw new Error("Secure crypto unavailable. Open through localhost.");
+
+  const data = await file.arrayBuffer();
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  currentHash = Array.from(new Uint8Array(hash))
+   .map(b => b.toString(16).padStart(2,"0")).join("");
+
+  document.getElementById("hashResult").textContent = currentHash;
+  document.getElementById("integrity").textContent = "SHA-256 fingerprint generated successfully.";
+  document.getElementById("assessment").textContent =
+   "Preliminary examination completed. Advanced forensic engines are still required.";
+
+  currentReport =
+   "MIRAJ FORENSICS - ANALYSIS REPORT\n\n" +
+   "File Name: " + file.name + "\n" +
+   "File Type: " + (file.type || "Unknown") + "\n" +
+   "File Size: " + formatSize(file.size) + "\n" +
+   "Media Information: " + mediaInfo + "\n" +
+   "JPEG EXIF Metadata:\n" + exifSummary + "\n" +
+   "EXIF Data Validation: " +
+    (exifData && exifData.found
+     ? (exifData.issues.length
+        ? exifData.issues.join(" | ")
+        : "No EXIF boundary or format warnings detected. Not proof of authenticity.")
+     : "Not applicable: EXIF data not found or not supported.") + "\n" +
+   "File Modified Date: " + document.getElementById("modifiedDate").textContent + "\n" +
+   "SHA-256: " + currentHash + "\n\n" +
+   "AI Authenticity: Not analyzed\nSimilarity Detection: Not checked\n" +
+   "JPEG Structure Examination: " +
+    (jpegStructure ? jpegStructure.status + " — " + jpegStructure.summary +
+     "\nSegments: " + jpegStructure.segments +
+     "\nScans: " + jpegStructure.scans +
+     "\nTrailing bytes: " + jpegStructure.trailingBytes +
+     "\nAdditional SOI markers: " + jpegStructure.additionalSOI +
+     "\nIssues: " + (jpegStructure.issues.join(" | ") || "None") : "Not applicable") + "\n" +
+   "PNG Structure Examination: " +
+   (pngStructure ? pngStructure.status + " — " + pngStructure.summary +
+    "\nDimensions: " + pngStructure.width + " × " + pngStructure.height +
+    "\nBit Depth: " + pngStructure.bitDepth +
+    "\nColor Type: " + pngStructure.colorType +
+    "\nChunks: " + pngStructure.chunks +
+    "\nIDAT Found: " + pngStructure.idat +
+    "\nIEND Found: " + pngStructure.iend +
+    "\nTrailing Bytes: " + pngStructure.trailingBytes +
+    "\nIssues: " + (pngStructure.issues.join(" | ") || "None")
+    : "Not applicable") + "\n" +
+   "PNG Metadata Extraction:\n" +
+   (pngStructure
+    ? ((pngStructure.metadata || []).length
+       ? pngStructure.metadata.map(item =>
+          "[" + item.type + "] " + item.keyword +
+          (item.language ? " (Language: " + item.language + ")" : "") +
+          (item.translatedKeyword ? " (Translated: " + item.translatedKeyword + ")" : "") +
+          ": " + item.text
+         ).join("\n") +
+         "\nNote: Metadata presence does not prove image authenticity."
+       : "No supported PNG text metadata found.")
+    : "Not applicable") + "\n" +
+   "PNG Metadata Validation:\n" +
+   (pngStructure
+    ? ((pngStructure.metadataIssues || []).join(" | ") || "No metadata validation warnings.")
+    : "Not applicable") + "\n" +
+   "Modification Analysis: " + modificationResult.status + " — " + modificationResult.summary + "\n\n" +
+   "Assessment: Preliminary examination completed.\n" +
+   "Note: Modified date is not proof of original capture date.";
+
+  report.style.display = "block";
+  status.textContent = "Preliminary examination completed successfully.";
+  addHistory("Examined " + file.name);
+
+ } catch(error) {
+  status.textContent = "Analysis error: " + error.message;
+ } finally {
+  // Automatic analysis requires no manual button.
+ }
+}
+
+async function copyHash() {
+ if (!currentHash) return;
+ try {
+  await navigator.clipboard.writeText(currentHash);
+  alert("SHA-256 copied successfully.");
+ } catch(error) {
+  alert("Copy unavailable. Please copy manually.");
+ }
+}
+
+function downloadReport() {
+ if (!currentReport) return;
+ const blob = new Blob([currentReport],{type:"text/plain;charset=utf-8"});
+ const url = URL.createObjectURL(blob);
+ const link = document.createElement("a");
+ link.href = url;
+ link.download = "MIRAJ_FORENSICS_Report.txt";
+ link.click();
+ URL.revokeObjectURL(url);
+}
+
+function resetAnalysis() {
+ document.getElementById("mediaFile").value = "";
+ document.getElementById("report").style.display = "none";
+ document.getElementById("status").textContent = "Waiting for file selection...";
+ currentHash = "";
+ currentReport = "";
+}
+
+document.getElementById("mediaFile").addEventListener("change", analyzeFile);
+
+let metadataReport = "";
+
+function readExifJPEG(buffer) {
+ const view = new DataView(buffer);
+ const length = view.byteLength;
+
+ const empty = (found, issues) => ({
+  found,
+  make: null,
+  model: null,
+  date: null,
+  software: null,
+  width: null,
+  height: null,
+  gps: null,
+  issues
+ });
+
+ if (length < 4 || view.getUint16(0, false) !== 0xFFD8) {
+  return empty(false, ["Invalid JPEG SOI marker."]);
+ }
+
+ let pos = 2;
+ let tiffStart = -1;
+ let tiffEnd = -1;
+
+ while (pos + 4 <= length) {
+  if (view.getUint8(pos) !== 0xFF) break;
+
+  while (pos < length && view.getUint8(pos) === 0xFF) pos++;
+  if (pos >= length) break;
+
+  const marker = view.getUint8(pos++);
+
+  if (marker === 0xD9 || marker === 0xDA) break;
+  if (marker === 0x01 || (marker >= 0xD0 && marker <= 0xD7)) continue;
+
+  if (pos + 2 > length) break;
+
+  const segmentLength = view.getUint16(pos, false);
+  if (segmentLength < 2 || pos + segmentLength > length) break;
+
+  const dataStart = pos + 2;
+  const segmentEnd = pos + segmentLength;
+
+  if (
+   marker === 0xE1 &&
+   segmentLength >= 8 &&
+   dataStart + 6 <= segmentEnd &&
+   view.getUint8(dataStart) === 0x45 &&
+   view.getUint8(dataStart + 1) === 0x78 &&
+   view.getUint8(dataStart + 2) === 0x69 &&
+   view.getUint8(dataStart + 3) === 0x66 &&
+   view.getUint8(dataStart + 4) === 0 &&
+   view.getUint8(dataStart + 5) === 0
+  ) {
+   tiffStart = dataStart + 6;
+   tiffEnd = segmentEnd;
+   break;
+  }
+
+  pos += segmentLength;
+ }
+
+ if (tiffStart < 0) return empty(false, []);
+
+ const issues = [];
+
+ try {
+  const tiffSize = tiffEnd - tiffStart;
+
+  function inBounds(offset, size) {
+   return Number.isSafeInteger(offset) &&
+    Number.isSafeInteger(size) &&
+    offset >= 0 && size >= 0 &&
+    offset + size <= tiffSize;
+  }
+
+  const byteOrder =
+   String.fromCharCode(view.getUint8(tiffStart)) +
+   String.fromCharCode(view.getUint8(tiffStart + 1));
+
+  if (byteOrder !== "II" && byteOrder !== "MM") {
+   throw new Error("Invalid EXIF byte order.");
+  }
+
+  const little = byteOrder === "II";
+
+  function u16(offset) {
+   if (!inBounds(offset, 2)) throw new Error("EXIF SHORT outside TIFF boundary.");
+   return view.getUint16(tiffStart + offset, little);
+  }
+
+  function u32(offset) {
+   if (!inBounds(offset, 4)) throw new Error("EXIF LONG outside TIFF boundary.");
+   return view.getUint32(tiffStart + offset, little);
+  }
+
+  if (u16(2) !== 42) throw new Error("Invalid TIFF header.");
+
+  const typeSizes = {
+   1: 1, 2: 1, 3: 2, 4: 4, 5: 8,
+   6: 1, 7: 1, 8: 2, 9: 4, 10: 8,
+   11: 4, 12: 8
+  };
+
+  function readIFD(offset) {
+   if (!inBounds(offset, 2)) {
+    throw new Error("EXIF directory offset is outside TIFF boundary.");
+   }
+
+   const count = u16(offset);
+
+   if (count > 1000 || !inBounds(offset + 2, count * 12 + 4)) {
+    throw new Error("Invalid or truncated EXIF directory.");
+   }
+
+   const result = {};
+
+   for (let i = 0; i < count; i++) {
+    const entry = offset + 2 + i * 12;
+
+    const tag = u16(entry);
+    const type = u16(entry + 2);
+    const n = u32(entry + 4);
+    const unit = typeSizes[type];
+
+    if (!unit || n > 10000) continue;
+
+    const total = unit * n;
+    if (!Number.isSafeInteger(total)) continue;
+
+    const dataOffset = total <= 4
+     ? entry + 8
+     : u32(entry + 8);
+
+    if (!inBounds(dataOffset, total)) {
+     issues.push("EXIF tag 0x" + tag.toString(16) + " exceeds TIFF boundary.");
+     continue;
+    }
+
+    const absolute = tiffStart + dataOffset;
+    let value;
+
+    if (type === 2) {
+     let out = "";
+     for (let j = 0; j < n; j++) {
+      const ch = view.getUint8(absolute + j);
+      if (ch === 0) break;
+      out += String.fromCharCode(ch);
+     }
+     value = out.trim();
+    } else {
+     value = [];
+
+     for (let j = 0; j < n; j++) {
+      const at = absolute + j * unit;
+      let v = null;
+
+      if (type === 1 || type === 7) v = view.getUint8(at);
+      if (type === 6) v = view.getInt8(at);
+      if (type === 3) v = view.getUint16(at, little);
+      if (type === 8) v = view.getInt16(at, little);
+      if (type === 4) v = view.getUint32(at, little);
+      if (type === 9) v = view.getInt32(at, little);
+
+      if (type === 5 || type === 10) {
+       const numerator = type === 5
+        ? view.getUint32(at, little)
+        : view.getInt32(at, little);
+
+       const denominator = type === 5
+        ? view.getUint32(at + 4, little)
+        : view.getInt32(at + 4, little);
+
+       v = denominator === 0 ? null : numerator / denominator;
+      }
+
+      if (type === 11) v = view.getFloat32(at, little);
+      if (type === 12) v = view.getFloat64(at, little);
+
+      value.push(v);
+     }
+
+     if (value.length === 1) value = value[0];
+    }
+
+    result[tag] = value;
+   }
+
+   return result;
+  }
+
+  const ifd0 = readIFD(u32(4));
+  const exifPointer = ifd0[0x8769];
+  const gpsPointer = ifd0[0x8825];
+
+  const exif = Number.isInteger(exifPointer)
+   ? readIFD(exifPointer) : {};
+
+  const gps = Number.isInteger(gpsPointer)
+   ? readIFD(gpsPointer) : {};
+
+  function gpsDecimal(values, ref, max, positiveRef, negativeRef) {
+   if (!Array.isArray(values) || values.length !== 3) return null;
+   if (!values.every(v => typeof v === "number" && Number.isFinite(v) && v >= 0)) return null;
+   if (values[0] > max || values[1] >= 60 || values[2] >= 60) return null;
+
+   if (ref !== positiveRef && ref !== negativeRef) return null;
+
+   let result = values[0] + values[1] / 60 + values[2] / 3600;
+   if (ref === negativeRef) result = -result;
+   return result;
+  }
+
+  const lat = gpsDecimal(gps[2], gps[1], 90, "N", "S");
+  const lon = gpsDecimal(gps[4], gps[3], 180, "E", "W");
+
+  if ((gps[2] || gps[4]) && (lat === null || lon === null)) {
+   issues.push("GPS data is incomplete or outside valid coordinate ranges.");
+  }
+
+  const date = exif[0x9003] || ifd0[0x0132] || null;
+
+  if (date && !/^\d{4}:\d{2}:\d{2} \d{2}:\d{2}:\d{2}$/.test(date)) {
+   issues.push("EXIF date format is unusual; original date was preserved without verification.");
+  }
+
+  return {
+   found: true,
+   make: ifd0[0x010F] || null,
+   model: ifd0[0x0110] || null,
+   date,
+   software: ifd0[0x0131] || null,
+   width: exif[0xA002] || ifd0[0x0100] || null,
+   height: exif[0xA003] || ifd0[0x0101] || null,
+   gps: lat !== null && lon !== null
+    ? lat.toFixed(6) + ", " + lon.toFixed(6)
+    : null,
+   issues
+  };
+
+ } catch (error) {
+  issues.push(error.message);
+  return empty(true, issues);
+ }
+}
+
+async function analyzeMetadata() {
+ const file = document.getElementById("metadataFile").files[0];
+ const status = document.getElementById("metadataStatus");
+ const results = document.getElementById("metadataResults");
+
+ if (!file) {
+  status.textContent = "Please select a JPEG image first.";
+  return;
+ }
+
+ results.style.display = "none";
+ status.textContent = "Reading JPEG EXIF metadata...";
+
+ try {
+  const buffer = await file.arrayBuffer();
+  const data = readExifJPEG(buffer);
+
+  const rows = [
+   ["Camera Make", data.make],
+   ["Camera Model", data.model],
+   ["Original Capture Date", data.date],
+   ["Editing Software", data.software],
+   ["EXIF Image Width", data.width],
+   ["EXIF Image Height", data.height],
+   ["GPS Coordinates", data.gps]
+  ];
+
+  const info = [
+   "File Name: " + file.name,
+   "File Type: " + (file.type || "Unknown"),
+   "File Size: " + formatSize(file.size),
+   "File Modified Date: " +
+    (file.lastModified ? new Date(file.lastModified).toLocaleString() : "Not available")
+  ].join("\n");
+
+  const details = data.found
+   ? rows.map(row => row[0] + ": " + (row[1] === null ? "Not Found" : row[1])).join("\n")
+   : "EXIF information: Not Found in this JPEG.";
+
+  document.getElementById("metadataFileInfo").textContent = info;
+  document.getElementById("metadataDetails").textContent = details;
+
+  metadataReport =
+   "MIRAJ FORENSICS - METADATA REPORT\n\n" +
+   info + "\n\n" +
+   details + "\n\n" +
+   "Note: Metadata can be edited or removed. EXIF data alone does not prove authenticity or ownership.";
+
+  results.style.display = "block";
+  status.textContent = data.found
+   ? "JPEG EXIF examination completed."
+   : "JPEG opened, but no EXIF data was found.";
+
+  addHistory("Metadata examined: " + file.name);
+
+ } catch (error) {
+  status.textContent = "Metadata analysis error: " + error.message;
+ }
+}
+
+function downloadMetadataReport() {
+ if (!metadataReport) return;
+
+ const blob = new Blob([metadataReport], {
+  type: "text/plain;charset=utf-8"
+ });
+
+ const url = URL.createObjectURL(blob);
+ const link = document.createElement("a");
+ link.href = url;
+ link.download = "MIRAJ_FORENSICS_Metadata_Report.txt";
+ link.click();
+
+ setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+</script>
+</body>
+</html>
